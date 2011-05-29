@@ -10,6 +10,17 @@
 		protected $_stdout = null;
 		protected $_stderr = null;
 
+		protected $_color_on = false;
+
+		const BLACK   = 30;
+		const RED     = 31;
+		const GREEN   = 32;
+		const YELLOW  = 33;
+		const BLUE    = 34;
+		const MAGENTA = 35;
+		const CYAN    = 36;
+		const WHITE   = 37;
+
 		public function before () {
 			parent::before();
 			// Throw a 404 if we are not running from CLI
@@ -23,6 +34,9 @@
 		public function after () {
 			parent::after();
 
+			// Turn of color on STDOUT
+			$this->no_color();
+
 			// Close handles to streams (quietly)
 			@fclose( $this->stdout );
 			@fclose( $this->stderr );
@@ -30,28 +44,39 @@
 
 
 		// Just a pass-through to built in CLI stuff
-		protected option ( $options ) { return CLI::options( $options ); }
+		protected function option ( $options ) { return CLI::options( $options ); }
 
 		// Write raw to STDOUT
-		protected stdout ( $message, $flush = false ) {
+		protected function stdout ( $message, $flush = false ) {
 			fwrite( $this->_stdout, $message );
 			if( $flush ) { fflush( $this->_stdout ); }
 		}
 		
 		// Write a line to STDOUT
-		protected stdout_ln ( $message, $flush ) {
+		protected function stdout_ln ( $message, $flush ) {
 			$this->stdout( $message . "\r\n", $flush );
 		}
 
 		// Write raw to STDERR
-		protected stderr ( $message, $flush = false ) {
+		protected function stderr ( $message, $flush = false ) {
 			fwrite( $this->_stderr, $message );
 			if( $flush ) { fflush( $this->stderr ); }
 		}
 
 		// Write a line to STDERR
-		protected stderr_ln ( $message, $flush ) {
+		protected function stderr_ln ( $message, $flush ) {
 			$this->stderr( $message . "\r\n", $flush );
+		}
+
+		// Start a color on stdout
+		protected function color ( $color ) {
+			fwrite( $this->_stdout, chr(27) . '[0;' . $color . 'm' );
+			$this0>_color_on = true;
+		}
+		
+		protected function no_color () {
+			fwrite( $this->_stdout, chr(27) . '[m' );
+			$this->_color_on = false;
 		}
 
 	}
